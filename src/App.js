@@ -5,19 +5,22 @@ import Container from 'react-bootstrap/Container';
 import { ToastContainer} from 'react-toastify';
 import {UserContext} from './UseContext/UseContext'
 import AppRoutes from './routes/AppRoutes';
+import { useSelector, useDispatch } from 'react-redux'
+import { handleRefetch } from './redux/actions/userAction';
 
 
-function App() {
-  const { user, loginContext } = useContext(UserContext);
-  console.log(">>> check useContext: ", user)
 
+function App(props) {
+
+  const dispatch = useDispatch()
   useEffect(() => {
     if(localStorage.getItem('token')){
-      loginContext(localStorage.getItem('email'), localStorage.getItem('token'))
+      dispatch(handleRefetch())
 
     }
   }, [])
-
+  const dataRedux = useSelector((state) => state.user.user)
+  console.log(">>check redux: ", dataRedux)
   return (<>
     <div className='app-container'>
       <Container>

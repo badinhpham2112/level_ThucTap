@@ -1,19 +1,18 @@
 import { useEffect, useState } from 'react';
 import '../App.scss'
-import { login } from '../services/useService';
 import {  toast } from 'react-toastify';
 import { useNavigate} from "react-router-dom";
 import Spinner from 'react-bootstrap/Spinner';
-import { UserContext } from '../UseContext/UseContext';
-import {useContext} from "react"
+import { handleLoginRedux } from '../redux/actions/userAction';
+import { useDispatch, useSelector } from 'react-redux'
 const Login = () => {
     const navigate = useNavigate()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const { loginContext } = useContext(UserContext);
-
+    const isLoading = useSelector(state => state.user.isLoading)
+    const user = useSelector(state => state.user.user)
+    const dispatch = useDispatch()
     useEffect(() => {
         let token = localStorage.getItem('token');
         if(token){
@@ -27,23 +26,17 @@ const Login = () => {
             toast.error("Chưa đăng nhập email và password")
             return;
         }
-        setLoading(true)
-        let res = await login(email.trim(), password)
-      
-        if(res && res.token){
-            loginContext(email, res.token)
-            navigate("/")
-            toast.success("Login thành công")
-          
-        }else{
-            if(res && res.status === 400){
-                toast.error(res.data.error)
-
-            }
-        }
-        setLoading(false)
+        
+            dispatch(handleLoginRedux(email, password))
           
     }
+
+    useEffect(() => {
+        if(user && user.auth === true){
+            navigate('/')
+        }
+
+    }, [user])
 
     const handleKeyDown = (event) => {
     
@@ -51,6 +44,10 @@ const Login = () => {
             handleLogin()
         }
 
+    }
+
+    const handleGoBack = () => {
+        navigate("/")
     }
     return(
         <div className="col-10 col-sm-6 col-xl-3 mx-auto d-flex flex-column">
@@ -84,9 +81,9 @@ const Login = () => {
             onClick={() => handleLogin()}
            
             // disabled={email && password || loading === true ? false : true } 
-            disabled={loading || (!email || !password)}
+            disabled={isLoading || (!email || !password)}
             className={email && password ? "btn btn-danger border-0" : "py-1 border-0"}>
-               {loading &&
+               {isLoading &&
                <Spinner
                as="span"
                animation="border"
@@ -96,7 +93,9 @@ const Login = () => {
                />
                } 
                 Login</button>
-            <h2 className="fs-6 my-4 text-center "><i className="fas fa-chevron-left"></i> Go back</h2>
+            <h2 style={{cursor: 'pointer'}}  
+            onClick={() => handleGoBack()} 
+            className="fs-6 my-4 text-center "><i className="fas fa-chevron-left"></i> Go back</h2>
         </div>
     )
 

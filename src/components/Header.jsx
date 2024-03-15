@@ -5,25 +5,28 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import { useNavigate} from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import {  toast } from 'react-toastify';
-import { UserContext } from '../UseContext/UseContext';
-import {useContext} from "react"
+import { useDispatch, useSelector } from 'react-redux'
+import { handleLogoutRedux } from '../redux/actions/userAction';
+import { useEffect } from 'react';
+
 
 
 
 const Header= (props) => {
-  const { logout } = useContext(UserContext);
-  const { user } = useContext(UserContext);
- 
-
+  const user = useSelector(state => state.user.user)
+  const dispatch = useDispatch()
   const navigte = useNavigate()
 
   const handleLogout = () => {
-    
-    logout()
+    dispatch(handleLogoutRedux())
+  } 
+  useEffect(() => {
+    if(user && user.auth === true){
     navigte('/')
     toast.success('Đăng xuất thành công')
 
-  } 
+    }
+  }, [user])
     return(
         <Navbar expand="lg" className="bg-body-tertiary">
         
